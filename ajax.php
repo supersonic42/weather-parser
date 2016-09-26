@@ -2,20 +2,20 @@
 
 function queryVar($key, $default = null)
 {
-	if (isset($_GET[$key]))
-	{
-		$val = $_GET[$key];
-	}
-	else if (isset($_POST[$key]))
-	{
-		$val = $_POST[$key];
-	}
-	else
-	{
-		$val = $default;
-	}
+    if (isset($_GET[$key]))
+    {
+        $val = $_GET[$key];
+    }
+    else if (isset($_POST[$key]))
+    {
+        $val = $_POST[$key];
+    }
+    else
+    {
+        $val = $default;
+    }
 
-	return $val;
+    return $val;
 }
 
 $root   = __DIR__;
