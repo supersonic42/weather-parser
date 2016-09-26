@@ -40,7 +40,14 @@ switch ($oper)
     case 'writeInfoToFile':
         if (queryVar('data'))
         {
-            file_put_contents($root . '/data/week', queryVar('data'));
+            $dataDir = $root . '/data';
+            
+            if (!is_dir($dataDir))
+            {
+                mkdir($dataDir, 0777);
+            }
+            
+            file_put_contents($dataDir . '/week', queryVar('data'));
             
             $res['state'] = 'ok';
         }
