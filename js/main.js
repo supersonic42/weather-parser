@@ -3,7 +3,7 @@ $(document).ready(function() {
 });
 
 function initMainContent() {
-    var $root = $('main');
+    let $root = $('main');
     
     if ($root.length == 0) {
         return false;
@@ -11,7 +11,7 @@ function initMainContent() {
     
     loadWeatherInfo();
     
-    var $parseWeatherBtn = $root.find('#parseWeatherBtn');
+    let $parseWeatherBtn = $root.find('#parseWeatherBtn');
     
     $parseWeatherBtn.click(function() {
         $parseWeatherBtn.addClass('process');
@@ -26,7 +26,7 @@ function initMainContent() {
     });
     
     function parseWeatherHtml(str) {
-        var monthToNumber = {
+        let monthToNumber = {
             'января': '01',
             'февраля': '02',
             'марта': '03',
@@ -41,34 +41,39 @@ function initMainContent() {
             'декабря': '12',
         };
         
-        var weatherByDate = {};
+        let weatherByDate = {};
         
-        var content = document.createElement('html');
+        let content = document.createElement('html');
             content.innerHTML = str;
 
-        var $body = $(content).find('body');
-        var $tabPaneDetailed = $body.find('.tabs-panes__pane[aria-labelledby="forecasts-tab-1"]');
+        let $body = $(content).find('body');
+        let $tabPaneDetailed = $body.find('.b-page__container');
 
         //$root.append($tabPaneDetailed);
 
-        $tabPaneDetailed.find('dt.forecast-detailed__day').each(function(k, v) {
-            var dayNumberStr = $(v).find('.forecast-detailed__day-number').contents().get(0).nodeValue;
-                dayNumberStr = padNumber(dayNumberStr);
-            var monthNumberStr = $(v).find('.forecast-detailed__day-month').text();
-                monthNumberStr = monthNumberStr in monthToNumber ? monthToNumber[monthNumberStr] : '00';
-            var dateStr = new Date().getFullYear() + '-' + monthNumberStr + '-' + dayNumberStr;
+        $tabPaneDetailed.find('.card').each(function(k, v) {
+            let card = $(this);
+            let dayNumber = $(v).find('[class$="__day-number"]').text();
+
+            if (dayNumber.length == 0) {
+                return;
+            }
+
+            dayNumber = padNumber(dayNumber);
             
+            let dayMonth = $(v).find('[class$="__day-month"]').text();
+            let dateStr = dayNumber + ' ' + dayMonth + ' ' + new Date().getFullYear();
+
             weatherByDate[dateStr] = {};
 
-            var $dayInfo = $(v).next('.forecast-detailed__day-info');
-            var $weatherRows = $dayInfo.find('.weather-table__row');
-            
+            let $weatherRows = card.find('.weather-table__row');
+
             $weatherRows.each(function(k, v) {
-                var dayTimes = {0: 'morning', 1: 'day', 2: 'evening', 3: 'night'};
-                var dayTime = dayTimes[k];
-                var tempStr = $(v).find('.weather-table__temp').text();
-                var tempSplit = tempStr.split('…');
-                var press = $(v).find('.weather-table__body-cell_type_air-pressure .weather-table__value').text();
+                let dayTimes = {0: 'morning', 1: 'day', 2: 'evening', 3: 'night'};
+                let dayTime = dayTimes[k];
+                let tempStr = $(v).find('.weather-table__temp').text();
+                let tempSplit = tempStr.split('…');
+                let press = $(v).find('.weather-table__body-cell_type_air-pressure').text();
                 
                 weatherByDate[dateStr][dayTime] = {
                     'temp': {
@@ -88,32 +93,33 @@ function initMainContent() {
     }
     
     function loadWeatherInfo() {
-        var daytimeToLiteral = {
+        let daytimeToLiteral = {
             'morning': 'утро',
             'day': 'день',
             'evening': 'вечер',
             'night': 'ночь'
         };
         
-        var $weatherInfoWrap = $root.find('#weatherInfoWrap');
+        let $weatherInfoWrap = $root.find('#weatherInfoWrap');
         
         $weatherInfoWrap.html('<img src="/img/loading.gif">');
         
         $.get('/ajax.php', {oper: 'loadWeatherInfo'}, function(res) {
             setTimeout(function() {
                 if (res.state == 'ok') {
-                    var $table = $('<table class="weatherInfo"><tr><th>Время суток</th><th>Температура</th><th>Давление</th></tr></table>');
+                    let $table = $('<table class="weatherInfo"><tr><th>Время суток</th><th>Температура</th><th>Давление</th></tr></table>');
 
                     $weatherInfoWrap.html($table);
                     
-                    for (var dateStr in res.weatherInfo) {
+                    for (let dateStr in res.weatherInfo) {
                         $table.append($('<tr><td colspan="3" class="dateWrap">' + dateStr.split('-').reverse().join('.') + '</td></tr>'));
                         
-                        var dayTimeInfos = res.weatherInfo[dateStr];
+                        let dayTimeInfos = res.weatherInfo[dateStr];
                         
-                        for (var daytime in dayTimeInfos) {
-                            var dayTimeInfo = dayTimeInfos[daytime];
-                            var $datetimeInfo = $('<tr class="daytimeInfo"><td class="daytime">' + daytimeToLiteral[daytime] + '</td><td class="temp">' + dayTimeInfo.temp.from + (dayTimeInfo.temp.to != null ? '&hellip;' + dayTimeInfo.temp.to : '') + '</td><td class="press">' + dayTimeInfo.press + '</td></tr>').appendTo($table);
+                        for (let daytime in dayTimeInfos) {
+                            let dayTimeInfo = dayTimeInfos[daytime];
+
+                            $('<tr class="daytimeInfo"><td class="daytime">' + daytimeToLiteral[daytime] + '</td><td class="temp">' + dayTimeInfo.temp.from + (dayTimeInfo.temp.to != null ? '&hellip;' + dayTimeInfo.temp.to : '') + '</td><td class="press">' + dayTimeInfo.press + '</td></tr>').appendTo($table);
                         }
                     }
                 } else {
